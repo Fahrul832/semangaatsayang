@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Misi Rahasia Fani 🕵️‍♀️</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Poppins:wght@600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* --- AGENT STYLE (DARK MODE) --- */
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        background-color: #0b0c10;
+        background-image:
+          radial-gradient(circle at 50% 50%, #1f2833 0%, #0b0c10 100%),
+          linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, transparent 1px);
+        background-size:
+          100% 100%,
+          40px 40px,
+          40px 40px;
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #66fcf1;
+      }
+
+      /* SCAN LINE ANIMATION (Efek CCTV) */
+      body::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.06),
+            rgba(0, 255, 0, 0.02),
+            rgba(0, 0, 255, 0.06)
+          );
+        background-size:
+          100% 2px,
+          3px 100%;
+        pointer-events: none;
+        z-index: 999;
+      }
+
+      /* DOSSIER CARD (KARTU KASUS) */
+      .case-file {
+        width: 90%;
+        max-width: 420px;
+        background: rgba(31, 40, 51, 0.9);
+        border: 2px solid #45a29e;
+        box-shadow: 0 0 20px rgba(69, 162, 158, 0.3);
+        border-radius: 10px;
+        padding: 25px;
+        position: relative;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 10;
+      }
+      .case-file.active {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      /* HEADER */
+      .top-secret {
+        font-family: "Share Tech Mono", monospace;
+        color: #ff4757;
+        border: 2px solid #ff4757;
+        display: inline-block;
+        padding: 5px 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        transform: rotate(-2deg);
+      }
+
+      .icon-detective {
+        font-size: 4rem;
+        margin-bottom: 10px;
+        display: block;
+        text-shadow: 0 0 10px #66fcf1;
+        animation: pulse 2s infinite;
+      }
+
+      /* PERTANYAAN */
+      .riddle-box {
+        margin-bottom: 30px;
+        min-height: 100px;
+      }
+      .riddle-text {
+        font-size: 1.2rem;
+        color: #fff;
+        line-height: 1.5;
+      }
+      .typing-cursor::after {
+        content: "|";
+        animation: blink 1s infinite;
+      }
+
+      /* INPUT / PILIHAN */
+      .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .btn-opt {
+        background: transparent;
+        border: 1px solid #45a29e;
+        color: #66fcf1;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: "Share Tech Mono", monospace;
+        font-size: 1rem;
+        cursor: pointer;
+        text-align: left;
+        transition: 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-opt:hover {
+        background: rgba(69, 162, 158, 0.1);
+      }
+      .btn-opt::before {
+        content: "> ";
+        opacity: 0.5;
+      }
+
+      .btn-opt.correct {
+        background: #45a29e;
+        color: #0b0c10;
+        border-color: #66fcf1;
+        box-shadow: 0 0 15px #66fcf1;
+        font-weight: bold;
+      }
+      .btn-opt.wrong {
+        background: #ff4757;
+        color: white;
+        border-color: #ff4757;
+      }
+
+      /* MODAL RAHASIA (GOMBALAN) */
+      .secret-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0b0c10;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        clip-path: circle(0% at 50% 50%);
+        transition: clip-path 0.6s ease-out;
+      }
+      .secret-overlay.reveal {
+        clip-path: circle(150% at 50% 50%);
+      }
+
+      .stamp-solved {
+        font-family: "Share Tech Mono", monospace;
+        font-size: 3rem;
+        color: #45a29e;
+        border: 5px solid #45a29e;
+        padding: 10px 20px;
+        border-radius: 10px;
+        transform: rotate(-10deg);
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: stamp 0.5s 0.3s forwards;
+      }
+
+      .fact-text {
+        font-size: 1.1rem;
+        color: #c5c6c7;
+        margin-bottom: 30px;
+      }
+
+      .btn-next {
+        background: #66fcf1;
+        color: #0b0c10;
+        border: none;
+        padding: 15px 40px;
+        font-weight: bold;
+        font-family: "Share Tech Mono";
+        cursor: pointer;
+        box-shadow: 0 0 10px #66fcf1;
+      }
+
+      /* ANIMATIONS */
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      @keyframes stamp {
+        from {
+          opacity: 0;
+          transform: scale(2) rotate(-10deg);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) rotate(-10deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="case-file active" id="caseCard">
+      <div class="top-secret">RAHASIA NEGARA</div>
+      <div class="icon-detective">🕵️‍♀️</div>
+
+      <div class="riddle-box">
+        <div style="color: #45a29e; font-size: 0.8rem; margin-bottom: 5px">
+          KASUS #<span id="caseNum">001</span>
+        </div>
+        <div class="riddle-text" id="qText">Memuat data intelijen...</div>
+      </div>
+
+      <div class="options-grid" id="optBox"></div>
+
+      <div class="secret-overlay" id="secretLayer">
+        <div class="stamp-solved">TERPECAHKAN</div>
+        <p class="fact-text" id="gombalText">...</p>
+        <button class="btn-next" onclick="nextCase()">
+          KASUS BERIKUTNYA >>
+        </button>
+      </div>
+
+      <div class="secret-overlay" id="endScreen">
+        <div style="font-size: 5rem">💼❤️</div>
+        <h1 style="color: #66fcf1">MISI SELESAI</h1>
+        <p style="color: #ccc; margin-bottom: 30px">
+          Agen Fani telah berhasil memecahkan<br />misteri hati Agen Fahrul.<br />
+          Status: <b>TERBUKTI SAYANG</b>
+        </p>
+        <a
+          href="https://wa.me/62895622188096?text=Lapor%20Komandan!%20Semua%20kasus%20sudah%20terpecahkan.%20Ternyata%20pelakunya%20kamu%20ya%20yang%20bikin%20kangen%20%F0%9F%98%8E%F0%9F%94%8D"
+          style="
+            background: #45a29e;
+            color: #0b0c10;
+            padding: 15px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: &quot;Share Tech Mono&quot;;
+            box-shadow: 0 0 15px #45a29e;
+          "
+        >
+          LAPOR KE MARKAS 📡
+        </a>
+      </div>
+    </div>
+
+    <script>
+      const cases = [
+        {
+          id: "001",
+          q: "Sebuah pencurian besar terjadi. Tidak ada barang yang hilang, tapi korban merasa 'kosong' tanpanya. Siapa pelakunya?",
+          opts: ["Pencuri Profesional", "Hantu", "Kamu (Fani)"],
+          ans: 2,
+          gombal:
+            "Kamu tersangka utamanya! Soalnya kamu udah mencuri hatiku sampai aku gak bisa mikir. 👮‍♂️❤️",
+        },
+        {
+          id: "002",
+          q: "Zat kimia ini sangat berbahaya. Sekali kena, bisa bikin senyum-senyum sendiri seharian. Zat apa itu?",
+          opts: ["Dopamin", "Notifikasi WA dari Kamu", "Kafein"],
+          ans: 1,
+          gombal:
+            "Tiap HP bunyi ting! dari kamu, efeknya lebih kuat dari kopi manapun. Bikin melek dan happy! 📱✨",
+        },
+        {
+          id: "003",
+          q: "Teka-teki Tempat: Semakin sering dikunjungi, semakin susah keluarnya. Tempat apakah ini?",
+          opts: ["Labirin", "Hutan Amazon", "Pikiranmu"],
+          ans: 2,
+          gombal:
+            "Sekali aku masuk ke pikiranmu, eh malah kejebak gak bisa keluar. Mikirin kamu terus sih! 🤯💕",
+        },
+        {
+          id: "004",
+          q: "Kasus Penipuan: Barang ini terlihat biasa di foto, tapi aslinya bikin jantung berdebar kencang. Barang apa itu?",
+          opts: ["Bom Waktu", "Senyumanmu", "Surat Tilang"],
+          ans: 1,
+          gombal:
+            "Foto kamu aja udah cantik, apalagi kalau ketemu langsung. Bikin jantungan tau! 💓",
+        },
+        {
+          id: "005",
+          q: "Misteri Waktu: Kenapa aku tidak mau menggunakan mesin waktu untuk kembali ke masa lalu?",
+          opts: [
+            "Takut dinosaurus",
+            "Bensinnya mahal",
+            "Masa depanku ada di kamu",
+          ],
+          ans: 2,
+          gombal:
+            "Buat apa ke masa lalu? Kan masa depan dan bahagiaku tujuannya sama kamu. 🚀💍",
+        },
+      ];
+
+      let currentIdx = 0;
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      // --- TYPEWRITER EFFECT ---
+      function typeWriter(text, elementId, speed = 30) {
+        let i = 0;
+        const el = document.getElementById(elementId);
+        el.innerHTML = "";
+        el.classList.add("typing-cursor");
+
+        function type() {
+          if (i < text.length) {
+            el.innerHTML += text.charAt(i);
+            i++;
+            // Suara ketik
+            if (i % 3 === 0) playSound(800, 0.05, "noise");
+            setTimeout(type, speed);
+          } else {
+            el.classList.remove("typing-cursor");
+          }
+        }
+        type();
+      }
+
+      // --- AUDIO ENGINE ---
+      function playSound(freq, duration, type = "sine") {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        if (type === "noise") {
+          // Simulasi suara ketik (noise burst)
+          osc.type = "square";
+          osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        } else {
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        }
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+
+      // --- GAME LOGIC ---
+      function loadCase() {
+        const data = cases[currentIdx];
+        document.getElementById("caseNum").innerText = data.id;
+
+        // Efek ngetik soal
+        typeWriter(data.q, "qText", 30);
+
+        const box = document.getElementById("optBox");
+        box.innerHTML = ""; // Clear previous
+
+        // Munculin opsi setelah soal selesai diketik (estimasi delay)
+        setTimeout(
+          () => {
+            data.opts.forEach((o, i) => {
+              const btn = document.createElement("button");
+              btn.className = "btn-opt";
+              btn.innerText = o;
+              btn.onclick = () => checkAns(i, btn);
+              box.appendChild(btn);
+            });
+          },
+          data.q.length * 30 + 200,
+        );
+      }
+
+      function checkAns(idx, btn) {
+        const data = cases[currentIdx];
+        if (idx === data.ans) {
+          btn.classList.add("correct");
+          playSound(1200, 0.1, "sine"); // Suara 'Ping'
+          setTimeout(() => {
+            document.getElementById("gombalText").innerText = data.gombal;
+            document.getElementById("secretLayer").classList.add("reveal");
+            playSound(600, 0.3, "triangle"); // Suara 'Stamp'
+          }, 800);
+        } else {
+          btn.classList.add("wrong");
+          playSound(150, 0.3, "sawtooth"); // Suara 'Buzz'
+          setTimeout(() => btn.classList.remove("wrong"), 500);
+        }
+      }
+
+      function nextCase() {
+        document.getElementById("secretLayer").classList.remove("reveal");
+        currentIdx++;
+        if (currentIdx < cases.length) {
+          setTimeout(loadCase, 500);
+        } else {
+          setTimeout(() => {
+            document.getElementById("endScreen").classList.add("reveal");
+          }, 500);
+        }
+      }
+
+      // Start
+      loadCase();
+    </script>
+  </body>
+</html>
